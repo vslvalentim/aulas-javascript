@@ -1,0 +1,1 @@
+const isAdulto = (idade) => idade >= 18;
