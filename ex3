@@ -1,0 +1,7 @@
+function verificarEstoque(quantidade) {
+  if (quantidade < 5) {
+    return "estoque critico";
+  } else {
+    return "estoque normal";
+  }
+}

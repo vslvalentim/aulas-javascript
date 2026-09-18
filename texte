@@ -1,0 +1,207 @@
+// ===================================================
+// ATIVIDADE 01 — SISTEMA DE CADASTRO INTERATIVO (CRUD)
+// ===================================================
+
+const readline = require('readline');
+
+// Criar interface para ler entrada do usuário
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+// 📦 ARRAY para guardar os itens (inicialmente vazio)
+let catalogo = [];
+
+// 🎯 FUNÇÃO: Perguntar algo ao usuário
+function pergunta(texto) {
+  return new Promise((resolve) => {
+    rl.question(texto, (resposta) => {
+      resolve(resposta);
+    });
+  });
+}
+
+// ===================================================
+// 🟢 CREATE — Adicionar um novo item
+// ===================================================
+async function adicionarItem() {
+  console.log("\n📝 === ADICIONAR NOVO ITEM ===\n");
+  
+  const nome = await pergunta("Nome do item: ");
+  const preco = parseFloat(await pergunta("Preço (R$): "));
+  const raridade = await pergunta("Raridade (Comum/Raro/Lendário): ");
+  const estoque = parseInt(await pergunta("Quantidade em estoque: "));
+  
+  // Validação
+  if (preco < 0) {
+    console.log("❌ ERRO: O preço não pode ser negativo!");
+    return;
+  }
+  
+  if (estoque < 0) {
+    console.log("❌ ERRO: O estoque não pode ser negativo!");
+    return;
+  }
+  
+  // Criar objeto com o item
+  const novoItem = {
+    id: catalogo.length + 1,        // ID único (posição + 1)
+    nome: nome,
+    preco: preco,
+    raridade: raridade,
+    estoque: estoque
+  };
+  
+  // Adicionar à lista
+  catalogo.push(novoItem);
+  console.log(`✅ Item "${nome}" adicionado com sucesso!\n`);
+}
+
+// ===================================================
+// 🔵 READ — Listar todos os itens
+// ===================================================
+function listarItens() {
+  console.log("\n📦 === CATÁLOGO DE ITENS ===\n");
+  
+  if (catalogo.length === 0) {
+    console.log("❌ Nenhum item cadastrado ainda.\n");
+    return;
+  }
+  
+  // Percorrer cada item
+  for (const item of catalogo) {
+    console.log(`ID: ${item.id}`);
+    console.log(`  Nome: ${item.nome}`);
+    console.log(`  Preço: R$ ${item.preco.toFixed(2)}`);
+    console.log(`  Raridade: ${item.raridade}`);
+    console.log(`  Estoque: ${item.estoque} unidades`);
+    console.log("---");
+  }
+  console.log();
+}
+
+// ===================================================
+// 🟡 UPDATE — Modificar um item existente
+// ===================================================
+async function atualizarItem() {
+  console.log("\n✏️ === ATUALIZAR ITEM ===\n");
+  
+  if (catalogo.length === 0) {
+    console.log("❌ Nenhum item para atualizar.\n");
+    return;
+  }
+  
+  listarItens();
+  
+  const idStr = await pergunta("Digite o ID do item a atualizar: ");
+  const id = parseInt(idStr);
+  
+  // Procurar o item com esse ID
+  const item = catalogo.find(i => i.id === id);
+  
+  if (!item) {
+    console.log("❌ Item não encontrado!\n");
+    return;
+  }
+  
+  console.log(`\nAtualizando: ${item.nome}\n`);
+  console.log("Digite os novos valores (ou deixe em branco para manter):\n");
+  
+  const novoNome = await pergunta("Novo nome: ");
+  const novoPreco = await pergunta("Novo preço: ");
+  const novaRaridade = await pergunta("Nova raridade: ");
+  const novoEstoque = await pergunta("Novo estoque: ");
+  
+  // Atualizar apenas se foi digitado algo
+  if (novoNome) item.nome = novoNome;
+  if (novoPreco) item.preco = parseFloat(novoPreco);
+  if (novaRaridade) item.raridade = novaRaridade;
+  if (novoEstoque) item.estoque = parseInt(novoEstoque);
+  
+  console.log(`✅ Item atualizado com sucesso!\n`);
+}
+
+// ===================================================
+// 🔴 DELETE — Remover um item
+// ===================================================
+async function deletarItem() {
+  console.log("\n🗑️ === DELETAR ITEM ===\n");
+  
+  if (catalogo.length === 0) {
+    console.log("❌ Nenhum item para deletar.\n");
+    return;
+  }
+  
+  listarItens();
+  
+  const idStr = await pergunta("Digite o ID do item a deletar: ");
+  const id = parseInt(idStr);
+  
+  // Encontrar posição do item
+  const indice = catalogo.findIndex(i => i.id === id);
+  
+  if (indice === -1) {
+    console.log("❌ Item não encontrado!\n");
+    return;
+  }
+  
+  const itemDeletado = catalogo[indice].nome;
+  catalogo.splice(indice, 1);
+  
+  console.log(`✅ Item "${itemDeletado}" deletado com sucesso!\n`);
+}
+
+// ===================================================
+// 🎮 MENU PRINCIPAL
+// ===================================================
+async function menu() {
+  console.log("\n╔════════════════════════════════════════╗");
+  console.log("║  🎮 SISTEMA DE CADASTRO ROBLOX (CRUD) ║");
+  console.log("╚════════════════════════════════════════╝\n");
+  
+  console.log("1️⃣  Adicionar item (CREATE)");
+  console.log("2️⃣  Listar itens (READ)");
+  console.log("3️⃣  Atualizar item (UPDATE)");
+  console.log("4️⃣  Deletar item (DELETE)");
+  console.log("5️⃣  Sair\n");
+  
+  const opcao = await pergunta("Escolha uma opção (1-5): ");
+  
+  switch(opcao) {
+    case '1':
+      await adicionarItem();
+      break;
+    case '2':
+      listarItens();
+      break;
+    case '3':
+      await atualizarItem();
+      break;
+    case '4':
+      await deletarItem();
+      break;
+    case '5':
+      console.log("\n👋 Encerrando sistema...\n");
+      rl.close();
+      return false; // Sinal para parar o loop
+    default:
+      console.log("\n❌ Opção inválida!\n");
+  }
+  
+  return true; // Continua o loop
+}
+
+// ===================================================
+// 🚀 FUNÇÃO PRINCIPAL (Loop do programa)
+// ===================================================
+async function iniciar() {
+  let rodando = true;
+  
+  while (rodando) {
+    rodando = await menu();
+  }
+}
+
+// Iniciar o programa
+iniciar();
