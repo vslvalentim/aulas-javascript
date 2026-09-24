@@ -1,0 +1,10 @@
+const perderEnergia = function(energiaInicial) {
+    let energia = energiaInicial;
+
+    while (energia > 0) {
+        console.log(energia);
+        energia -= 10;
+    }
+};
+
+perderEnergia(50);
